@@ -1,9 +1,8 @@
 package dev.alexzvn.universalyogaplus.util
 
 import androidx.compose.runtime.Composable
-import dev.alexzvn.universalyogaplus.ui.theme.UniversalYogaPlusTheme
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 
-
-fun theming(block: @Composable () -> Unit) = @Composable {
-    UniversalYogaPlusTheme(content = block)
-}
+@Composable
+fun Int.asPainter(): Painter = painterResource(this)
