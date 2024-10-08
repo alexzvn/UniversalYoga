@@ -28,7 +28,7 @@ enum class CourseType(private val text: String) {
 @Entity
 data class Course(
     @PrimaryKey(autoGenerate = true)
-    val id: String,
+    val id: Int,
 
     @ColumnInfo(name = "title")
     val title: String,
