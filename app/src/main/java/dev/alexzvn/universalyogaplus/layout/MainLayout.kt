@@ -1,5 +1,6 @@
 package dev.alexzvn.universalyogaplus.layout
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -22,63 +23,79 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import dev.alexzvn.universalyogaplus.R
 import dev.alexzvn.universalyogaplus.ui.theme.UniversalYogaPlusTheme
+import dev.alexzvn.universalyogaplus.util.Route
 import dev.alexzvn.universalyogaplus.util.asPainter
 
-sealed class NavigateSection() {}
-data object Home : NavigateSection()
-data object Cloud : NavigateSection()
-data object Profile : NavigateSection()
+sealed class NavigateSection() {
+    data object Home : NavigateSection()
+    data object Cloud : NavigateSection()
+    data object Profile : NavigateSection()
+
+    companion object {
+        fun handle(section: NavigateSection, navigation: NavController) {
+            when (section) {
+                is Home -> navigation.navigate(Route.Home)
+                is Cloud -> navigation.navigate(Route.Cloud)
+                is Profile -> navigation.navigate(Route.Profile)
+            }
+
+            Log.d("Navigation", "Navigate to ${section.javaClass.simpleName}")
+        }
+    }
+}
+
 
 @Composable
 fun MainLayout(
-    modifier: Modifier,
-    section: NavigateSection = Home,
+    modifier: Modifier = Modifier,
+    section: NavigateSection = NavigateSection.Home,
     onNavigate: (NavigateSection) -> Unit = {},
+    modal: @Composable () -> Unit = {},
     content: @Composable (padding: PaddingValues) -> Unit
 ) {
-    UniversalYogaPlusTheme {
-        Scaffold (
-            modifier = modifier,
+    Scaffold (
+        modifier = modifier,
 
-            bottomBar = {
-                NavigationBar(
-                    containerColor = Color.White
-                ) {
-
-                    val updateState: (NavigateSection) -> Unit = { value ->
-                        if (section != value) {
-                            section.apply(onNavigate)
-                        }
+        bottomBar = {
+            NavigationBar(
+                containerColor = Color.White
+            ) {
+                val updateState: (NavigateSection) -> Unit = { value ->
+                    if (section != value) {
+                        value.apply(onNavigate)
                     }
-
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-                        label = { Text("Home") },
-                        selected = section is Home,
-                        onClick = { updateState(Home) },
-                    )
-
-                    NavigationBarItem(
-                        icon = { Icon(R.drawable.baseline_cloud_24.asPainter(), contentDescription = "Home") },
-                        label = { Text("Cloud") },
-                        selected = section is Cloud,
-                        onClick = { updateState(Cloud) },
-                    )
-
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Filled.Person, contentDescription = "Home") },
-                        label = { Text("Profile") },
-                        selected = section is Profile,
-                        onClick = { updateState(Profile) },
-                    )
                 }
+
+                NavigationBarItem(
+                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
+                    label = { Text("Home") },
+                    selected = section is NavigateSection.Home,
+                    onClick = { updateState(NavigateSection.Home) },
+                )
+
+                NavigationBarItem(
+                    icon = { Icon(R.drawable.baseline_cloud_24.asPainter(), contentDescription = "Home") },
+                    label = { Text("Cloud") },
+                    selected = section is NavigateSection.Cloud,
+                    onClick = { updateState(NavigateSection.Cloud) },
+                )
+
+                NavigationBarItem(
+                    icon = { Icon(Icons.Filled.Person, contentDescription = "Home") },
+                    label = { Text("Profile") },
+                    selected = section is NavigateSection.Profile,
+                    onClick = { updateState(NavigateSection.Profile) },
+                )
             }
-        ) { padding ->
-            content(padding)
         }
+    ) { padding ->
+        content(padding)
     }
+
+    modal()
 }
 
 

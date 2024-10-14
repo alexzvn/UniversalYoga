@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class Schedule(
     @PrimaryKey(autoGenerate = true)
-    val id: String,
+    val id: Int,
 
     @ColumnInfo(name = "start_date")
     val date: String,
@@ -22,7 +22,7 @@ data class Schedule(
     @ColumnInfo(name = "start_time")
     val startTime: Int,
 
-    @Embedded
+    @Embedded(prefix = "course_")
     val course: Course,
 
     @ColumnInfo(name = "teacher")
