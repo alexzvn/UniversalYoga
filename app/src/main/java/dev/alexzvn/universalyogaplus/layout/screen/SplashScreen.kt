@@ -23,16 +23,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import dev.alexzvn.universalyogaplus.service.AuthService
 import dev.alexzvn.universalyogaplus.util.Route
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 
 @Composable
 fun SplashScreen(
     navigation: NavController,
     onBypass: () -> Unit = {},
 ) {
-    val scope = CoroutineScope(Dispatchers.Main + Job())
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         when (AuthService.user) {
