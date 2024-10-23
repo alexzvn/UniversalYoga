@@ -6,8 +6,12 @@ data object Route {
     val Profile = "profile"
 
     data object Course {
-        val Edit = "course/edit"
-        val View = "course/view"
+        val List = "course/list"
+        val Create = "course/create"
+        val Edit = "course/edit/{id}"
+        val View = "course/view/{id}"
+
+        fun edit(id: String) = "course/edit/$id"
     }
 
     data object Auth {
