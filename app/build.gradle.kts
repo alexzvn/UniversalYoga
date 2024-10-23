@@ -53,6 +53,8 @@ android {
 
 dependencies {
 
+    implementation("com.aventrix.jnanoid:jnanoid:2.0.0")
+
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
