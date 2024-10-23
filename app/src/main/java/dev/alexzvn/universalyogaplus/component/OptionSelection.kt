@@ -25,12 +25,14 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OptionSelection(
+fun <T> OptionSelection(
     modifier: Modifier = Modifier,
     label: @Composable () -> Unit,
-    options: List<String>,
-    selected: String,
-    onOptionSelected: (String) -> Unit
+    placeholder: @Composable (() -> Unit)? = null,
+    options: List<T>,
+    format: (T) -> String,
+    selected: T,
+    onOptionSelected: (T) -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -41,8 +43,9 @@ fun OptionSelection(
     ) {
         OutlinedTextField(
             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
-            value = selected,
+            value = format(selected),
             onValueChange = {},
+            placeholder = placeholder,
             readOnly = true,
             singleLine = true,
             label = label,
@@ -50,13 +53,14 @@ fun OptionSelection(
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
         )
 
+
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
             options.forEach {
                 DropdownMenuItem(
-                    text = { Text(it) },
+                    text = { Text(format(it)) },
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                     onClick = {
                         expanded = false
@@ -79,6 +83,7 @@ fun OptionSelectionPreview() {
             label = { Text("Label") },
             options = listOf("Option 1", "Option 2", "Option 3"),
             selected = "Option 1",
+            format = { it },
             onOptionSelected = {}
         )
     }
