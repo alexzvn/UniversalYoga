@@ -8,48 +8,51 @@ import androidx.room.Update
 
 @Dao
 interface CourseDAO {
-    @Query("SELECT * FROM course")
-    fun all(): List<Course>
+    @Query("SELECT * FROM course ORDER BY id DESC")
+    suspend fun all(): List<Course>
 
     @Query("SELECT * FROM course WHERE id IN (:scheduleIds)")
-    fun loadAllByIds(scheduleIds: IntArray): List<Course>
+    suspend fun loadAllByIds(scheduleIds: IntArray): List<Course>
 
     @Query("SELECT * FROM course WHERE title LIKE :title LIMIT 1")
-    fun findByTitle(title: String): Course
+    suspend fun findByTitle(title: String): Course?
+
+    @Query("SELECT * FROM course WHERE id = :id LIMIT 1")
+    suspend fun get(id: Int): Course?
 
     @Update
-    fun update(course: Course)
+    suspend fun update(course: Course)
 
     @Insert
-    fun insert(vararg courses: Course)
+    suspend fun insert(vararg courses: Course)
 
     @Delete
-    fun delete(course: Course)
+    suspend fun delete(course: Course)
 
     @Query("DELETE FROM course")
-    fun truncate()
+    suspend fun truncate()
 
     @Query("SELECT * FROM course WHERE title LIKE :query OR description LIKE :query OR type LIKE :query OR day_of_week LIKE :query")
-    fun search(query: String): List<Course>
+    suspend fun search(query: String): List<Course>
 }
 
 @Dao
 interface ScheduleDAO {
     @Query("SELECT * FROM schedule")
-    fun all(): List<Schedule>
+    suspend fun all(): List<Schedule>
 
     @Query("SELECT * FROM schedule WHERE id = :id LIMIT 1")
-    fun get(id: Long): Schedule?
+    suspend fun get(id: Long): Schedule?
 
     @Update
-    fun update(schedule: Schedule)
+    suspend fun update(schedule: Schedule)
 
     @Delete
-    fun delete(schedule: Schedule)
+    suspend fun delete(schedule: Schedule)
 
     @Insert
-    fun insert(vararg schedules: Schedule)
+    suspend fun insert(vararg schedules: Schedule)
 
     @Query("DELETE FROM schedule")
-    fun truncate()
+    suspend fun truncate()
 }
