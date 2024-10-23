@@ -1,11 +1,13 @@
 package dev.alexzvn.universalyogaplus.local
 
+import android.annotation.SuppressLint
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
+import dev.alexzvn.universalyogaplus.util.nanoid
 
-enum class DayOfWeek(private val text: String) {
+enum class DayOfWeek(val origin: String) {
     MONDAY("Monday"),
     TUESDAY("Tuesday"),
     WEDNESDAY("Wednesday"),
@@ -14,12 +16,9 @@ enum class DayOfWeek(private val text: String) {
     SATURDAY("Saturday"),
     SUNDAY("Sunday");
 
-    override fun toString(): String {
-        return text
-    }
 }
 
-enum class CourseType(private val text: String) {
+enum class CourseType(val origin: String) {
     FLOW_YOGA("Flow Yoga"),
     AERIAL_YOGA("Aerial Yoga"),
     FAMILY_YOGA("Family Yoga"),
@@ -28,7 +27,7 @@ enum class CourseType(private val text: String) {
 @Entity
 data class Course(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Int?,
 
     @ColumnInfo(name = "title")
     val title: String,
@@ -44,6 +43,9 @@ data class Course(
     @ColumnInfo(name = "capacity")
     val capacity: Int,
 
+    @ColumnInfo(name = "start_time")
+    val startTime: Int,
+
     /**
      * Duration in minutes
      */
@@ -57,5 +59,25 @@ data class Course(
     val type: CourseType,
 
     @ColumnInfo(name = "description")
-    val description: String? = null
-)
+    val description: String? = null,
+
+    @ColumnInfo(name = "nano_id")
+    val nanoID: String = nanoid(),
+
+    @ColumnInfo(name = "created_at")
+    val createdAt: Long = System.currentTimeMillis()
+) {
+    val parsedStartTime
+        @SuppressLint("DefaultLocale")
+        get() = object {
+            val hours: Int = startTime / 60
+            val minutes: Int = startTime % 60
+
+            override fun toString(): String {
+                val a = hours.toString().padStart(2, '0')
+                val b = minutes.toString().padStart(2, '0')
+
+                return "$a:$b"
+            }
+        }
+}
