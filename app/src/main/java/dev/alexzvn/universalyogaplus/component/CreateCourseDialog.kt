@@ -80,13 +80,13 @@ fun CreateCourseDialog(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        OptionSelection(
-                            modifier = Modifier.weight(1f),
-                            label = { Text("Day of week") },
-                            options = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"),
-                            selected = "Monday",
-                            onOptionSelected = {}
-                        )
+//                        OptionSelection(
+//                            modifier = Modifier.weight(1f),
+//                            label = { Text("Day of week") },
+//                            options = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"),
+//                            selected = "Monday",
+//                            onOptionSelected = {}
+//                        )
 
                         Spacer(Modifier.width(10.dp))
 

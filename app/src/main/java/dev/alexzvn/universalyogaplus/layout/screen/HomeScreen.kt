@@ -1,6 +1,7 @@
 package dev.alexzvn.universalyogaplus.layout.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -28,70 +29,54 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import dev.alexzvn.universalyogaplus.component.CourseCard
 import dev.alexzvn.universalyogaplus.component.CreateCourseDialog
 import dev.alexzvn.universalyogaplus.layout.MainLayout
 import dev.alexzvn.universalyogaplus.layout.NavigateSection
+import dev.alexzvn.universalyogaplus.layout.screen.section.CourseCreateSection
+import dev.alexzvn.universalyogaplus.layout.screen.section.CourseEditSection
+import dev.alexzvn.universalyogaplus.layout.screen.section.CourseListSection
 import dev.alexzvn.universalyogaplus.local.Course
 import dev.alexzvn.universalyogaplus.local.CourseType
 import dev.alexzvn.universalyogaplus.local.DayOfWeek
+import dev.alexzvn.universalyogaplus.util.Route
 
 @Composable
 fun HomeScreen(
     navigation: NavController
 ) {
-    var createDialog by remember { mutableStateOf(false) }
+    val navController = rememberNavController()
 
     MainLayout (
-        modal = {
-            if (createDialog) {
-                CreateCourseDialog(onDismiss = { createDialog = false })
-            }
-        },
         section = NavigateSection.Home,
-        onNavigate = { NavigateSection.handle(it, navigation) }
+        onNavigate = { NavigateSection.handle(it, navigation) },
     ) { padding ->
-        Column (modifier = Modifier.padding(padding)) {
-            Row (
-                modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Course Overview",
-                    modifier = Modifier.padding(top = 10.dp),
-                    style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                )
-
-                Button(
-                    onClick = { createDialog = true },
-                    contentPadding = PaddingValues(horizontal =  20.dp)
-                ) {
-                    Icon(Icons.Default.Add, "add")
-                    Spacer(Modifier.width(10.dp))
-                    Text("Add new")
-                }
+        NavHost(
+            modifier = Modifier.padding(padding),
+            navController = navController,
+            startDestination = Route.Course.List
+        ) {
+            composable(Route.Course.List) {
+                CourseListSection(navigation = navController)
             }
 
-            LazyColumn {
-                val course = Course(
-                    id = 1,
-                    title = "Example Yoga Class",
-                    dayOfWeek = DayOfWeek.MONDAY,
-                    capacity = 10,
-                    duration = 60,
-                    price = 100.0,
-                    type = CourseType.FLOW_YOGA,
-                    description = "This is an example yoga class"
+            composable(Route.Course.Create) {
+                CourseCreateSection(navigation = navController)
+            }
+
+            composable(
+                route = Route.Course.Edit,
+                arguments = listOf(navArgument("id") { type = NavType.IntType })
+            ) {
+                CourseEditSection(
+                    id = it.arguments?.getInt("id"),
+                    navigation = navController
                 )
-
-                items(8) {
-                    CourseCard(course)
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(100.dp))
-                }
             }
         }
     }
