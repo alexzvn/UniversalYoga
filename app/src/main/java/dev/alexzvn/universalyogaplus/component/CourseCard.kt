@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,31 +48,37 @@ import dev.alexzvn.universalyogaplus.R
 import dev.alexzvn.universalyogaplus.local.Course
 import dev.alexzvn.universalyogaplus.local.CourseType
 import dev.alexzvn.universalyogaplus.local.DayOfWeek
+import dev.alexzvn.universalyogaplus.util.Scope
 import dev.alexzvn.universalyogaplus.util.asPainter
+import dev.alexzvn.universalyogaplus.util.sleep
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun CourseCard(
+    modifier: Modifier = Modifier,
     course: Course,
     onClick: () -> Unit = {},
     onEdit: () -> Unit = {},
     onDelete: () -> Unit = {}
 ) {
     ElevatedCard (
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .padding(top = 16.dp)
-            .fillMaxWidth()
-            .defaultMinSize(Dp.Unspecified, 100.dp),
+        modifier = modifier,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         onClick = onClick,
     ) {
         Row (
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier
+                    .padding(10.dp)
+                    .weight(1f),
                 style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.SemiBold),
                 text = course.title
             )
@@ -79,7 +86,15 @@ fun CourseCard(
             Box (
                 modifier = Modifier.wrapContentSize(Alignment.TopStart)
             ) {
+                val scope = rememberCoroutineScope()
                 var expanded by remember { mutableStateOf(false) }
+
+                val close = {
+                    scope.launch {
+                        sleep(200)
+                        expanded = false
+                    }
+                }
 
                 IconButton(
                     onClick = { expanded = true }
@@ -93,19 +108,19 @@ fun CourseCard(
                 ) {
                     DropdownMenuItem(
                         text = { Text("Details") },
-                        onClick = onClick,
+                        onClick = { close().also { onClick() } },
                         leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) }
                     )
 
                     DropdownMenuItem(
                         text = { Text("Edit course") },
-                        onClick = onEdit,
+                        onClick = { close().also { onEdit() } },
                         leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
                     )
 
                     DropdownMenuItem(
                         text = { Text(text = "Delete course", color = Color.Red) },
-                        onClick = onDelete,
+                        onClick = { close().also { onDelete() } },
                         leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null) }
                     )
                 }
@@ -114,6 +129,7 @@ fun CourseCard(
 
         Row (
             modifier = Modifier.padding(horizontal = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 modifier = Modifier.alpha(.8f),
@@ -122,26 +138,36 @@ fun CourseCard(
             )
             Text(
                 text = "${course.price}",
-                modifier = Modifier.alpha(.7f).padding(top = 5.dp),
+                modifier = Modifier.alpha(.7f),
                 style = TextStyle(fontWeight = FontWeight.Bold)
             )
 
             Spacer(Modifier.width(10.dp))
 
             Icon(
-                modifier = Modifier.padding(end = 5.dp).alpha(.8f),
+                modifier = Modifier
+                    .padding(end = 5.dp)
+                    .alpha(.8f),
                 imageVector = Icons.Default.DateRange,
                 contentDescription = "Date"
             )
             Text(
-                text = "${course.dayOfWeek}, ${course.duration} min",
+                text = "${course.dayOfWeek.origin}, ${course.duration} min",
                 modifier = Modifier.alpha(.7f)
             )
 
-            Spacer(Modifier.width(10.dp))
+        }
 
+        Spacer(Modifier.height(5.dp))
+
+        Row (
+            modifier = Modifier.padding(horizontal = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
-                modifier = Modifier.padding(end = 5.dp).alpha(.8f),
+                modifier = Modifier
+                    .padding(end = 5.dp)
+                    .alpha(.8f),
                 imageVector = Icons.Default.AccountCircle,
                 contentDescription = "Date",
             )
@@ -150,19 +176,33 @@ fun CourseCard(
                 text = "${course.capacity}",
                 modifier = Modifier.alpha(.7f)
             )
+
+            Spacer(Modifier.width(10.dp))
+
+            Icon(
+                modifier = Modifier
+                    .padding(end = 5.dp)
+                    .alpha(.8f),
+                imageVector = Icons.Default.DateRange,
+                contentDescription = "Date"
+            )
+            Text(
+                text = "Start at ${course.parsedStartTime}",
+                modifier = Modifier.alpha(.7f)
+            )
         }
 
         course.description?.also {
             Text(
-                modifier = Modifier.alpha(.7f)
+                modifier = Modifier
+                    .alpha(.7f)
                     .padding(horizontal = 16.dp)
                     .padding(top = 10.dp),
                 style = TextStyle(fontSize = 16.sp),
                 text = course.description
             )
+            Spacer(Modifier.height(10.dp))
         }
-
-        Spacer(Modifier.height(16.dp))
     }
 }
 
@@ -177,10 +217,11 @@ fun CourseCardPreview() {
         duration = 60,
         price = 100.0,
         type = CourseType.FLOW_YOGA,
-        description = "This is an example yoga class. This is an example yoga class"
+        startTime = 10,
+        // description = "This is an example yoga class. This is an example yoga class"
     )
 
     Scaffold (modifier = Modifier.fillMaxWidth()) { it
-        CourseCard(course)
+        CourseCard(course = course)
     }
 }
