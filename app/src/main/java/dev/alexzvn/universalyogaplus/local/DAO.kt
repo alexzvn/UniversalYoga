@@ -44,6 +44,9 @@ interface ScheduleDAO {
     @Query("SELECT * FROM schedule WHERE id = :id LIMIT 1")
     suspend fun get(id: Long): Schedule?
 
+    @Query("SELECT * FROM schedule WHERE course_id = :id")
+    suspend fun getByCourse(id: Long): List<Schedule>
+
     @Update
     suspend fun update(schedule: Schedule)
 

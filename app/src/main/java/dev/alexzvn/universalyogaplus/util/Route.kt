@@ -12,6 +12,7 @@ data object Route {
         val View = "course/view/{id}"
 
         fun edit(id: String) = "course/edit/$id"
+        fun view(id: String) = "course/view/$id"
     }
 
     data object Auth {

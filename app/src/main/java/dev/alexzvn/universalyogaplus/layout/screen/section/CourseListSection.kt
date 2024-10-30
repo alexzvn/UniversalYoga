@@ -112,7 +112,10 @@ fun CourseListSection(
                                 .fillMaxWidth(),
                             course = it,
                             onDelete = { delete(it) },
-                            onEdit = { edit(it) }
+                            onEdit = { edit(it) },
+                            onClick = {
+                                navigation.navigate(Route.Course.view("${it.id}"))
+                            }
                         )
                     }
                 }

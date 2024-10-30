@@ -2,8 +2,10 @@ package dev.alexzvn.universalyogaplus.local
 
 import android.annotation.SuppressLint
 import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.Relation
 import androidx.room.TypeConverters
 import dev.alexzvn.universalyogaplus.util.nanoid
 
@@ -81,3 +83,13 @@ data class Course(
             }
         }
 }
+
+data class CourseWithSchedules(
+    @Embedded val course: Course,
+
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "course_id"
+    )
+    val schedules: List<Schedule>
+)

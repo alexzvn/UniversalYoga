@@ -1,10 +1,8 @@
 package dev.alexzvn.universalyogaplus.local
 
-import androidx.compose.runtime.Composable
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 @Entity
@@ -13,18 +11,14 @@ data class Schedule(
     val id: Int,
 
     @ColumnInfo(name = "start_date")
-    val date: String,
+    val date: Long,
 
-    /**
-     * Start at nth minute of the day
-     * eg: 30 -> 00:30, 210 -> 03:30
-     */
-    @ColumnInfo(name = "start_time")
-    val startTime: Int,
-
-    @Embedded(prefix = "course_")
-    val course: Course,
+    @ColumnInfo(name = "course_id")
+    val courseId: Int,
 
     @ColumnInfo(name = "teacher")
-    val teacher: String
+    val teacher: String,
+
+    @ColumnInfo(name = "comment")
+    val comment: String? = null
 )
