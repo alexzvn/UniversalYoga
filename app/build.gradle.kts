@@ -54,6 +54,7 @@ android {
 dependencies {
 
     implementation("com.aventrix.jnanoid:jnanoid:2.0.0")
+    implementation("com.github.javafaker:javafaker:1.0.2")
 
     // Firebase
     implementation(platform(libs.firebase.bom))

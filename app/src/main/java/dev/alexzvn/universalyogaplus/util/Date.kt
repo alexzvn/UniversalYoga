@@ -10,3 +10,6 @@ fun Date.toLocal(): LocalDate = this.toInstant().atZone(ZoneId.systemDefault()).
 fun LocalDate.format(pattern: String) = DateTimeFormatter.ofPattern(pattern).format(this)
 
 fun Long.asLocalDate(): LocalDate = Date(this).toLocal()
+
+
+fun LocalDate.toEpochMilli(): Long = this.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()

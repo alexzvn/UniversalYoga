@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -51,6 +52,7 @@ fun CourseListSection(
     LaunchedEffect(Unit) {
         scope.launch {
             courses = DatabaseService.course.all()
+            Log.d("CourseListSection", "Loaded ${courses.size} courses")
         }
     }
 
@@ -80,8 +82,6 @@ fun CourseListSection(
         val delete = { course: Course ->
             courses = courses.filter { it.id != course.id }
 
-            Log.d("CourseListSection", "Deleting course ${course.id}")
-
             scope.launch {
                 DatabaseService.course.delete(course)
             }
@@ -91,8 +91,8 @@ fun CourseListSection(
             navigation.navigate(Route.Course.edit("${course.id}"))
         }
 
-        when (courses.size) {
-            0 -> Column (
+        if (courses.isEmpty()) {
+            return Column (
                 modifier = Modifier
                     .fillMaxSize()
                     .alpha(.5f),
@@ -100,29 +100,29 @@ fun CourseListSection(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text("Add a new course to start", fontSize = 20.sp)
-            }
-            else -> LazyColumn (
-                modifier = Modifier.padding(horizontal = 16.dp),
-            ) {
-                items(courses.size) {
-                    courses.forEach {
-                        CourseCard(
-                            modifier = Modifier
-                                .padding(top = 16.dp)
-                                .fillMaxWidth(),
-                            course = it,
-                            onDelete = { delete(it) },
-                            onEdit = { edit(it) },
-                            onClick = {
-                                navigation.navigate(Route.Course.view("${it.id}"))
-                            }
-                        )
-                    }
-                }
+            }.run {  }
+        }
 
-                item {
-                    Spacer(modifier = Modifier.height(100.dp))
-                }
+        LazyColumn (
+            modifier = Modifier.padding(horizontal = 16.dp),
+        ) {
+            Log.d("CourseListSection", "Rendering ${courses.size} courses")
+            items(courses, key = { it.id!! }) {
+                CourseCard(
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .fillMaxWidth(),
+                    course = it,
+                    onDelete = { delete(it) },
+                    onEdit = { edit(it) },
+                    onClick = {
+                        navigation.navigate(Route.Course.view("${it.id}"))
+                    }
+                )
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(100.dp))
             }
         }
     }

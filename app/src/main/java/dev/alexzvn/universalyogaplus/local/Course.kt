@@ -7,7 +7,11 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import androidx.room.TypeConverters
+import java.time.DayOfWeek as DOW
 import dev.alexzvn.universalyogaplus.util.nanoid
+import dev.alexzvn.universalyogaplus.util.pickRandom
+import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
 enum class DayOfWeek(val origin: String) {
     MONDAY("Monday"),
@@ -18,12 +22,44 @@ enum class DayOfWeek(val origin: String) {
     SATURDAY("Saturday"),
     SUNDAY("Sunday");
 
+    val native: DOW
+        get() = when (this) {
+            MONDAY ->  DOW.MONDAY
+            TUESDAY -> DOW.TUESDAY
+            WEDNESDAY -> DOW.WEDNESDAY
+            THURSDAY -> DOW.THURSDAY
+            FRIDAY -> DOW.FRIDAY
+            SATURDAY -> DOW.SATURDAY
+            SUNDAY -> DOW.SUNDAY
+        }
+
+    fun generateDatesBetween(start: LocalDate, end: LocalDate): MutableList<LocalDate> {
+        val dates = mutableListOf<LocalDate>()
+        var current = start.with(TemporalAdjusters.nextOrSame(native))
+
+        while (current <= end) {
+            if (current >= start) {
+                dates.add(current)
+            }
+            current = current.plusWeeks(1)
+        }
+
+        return dates
+    }
+
+    companion object {
+        fun pickRandom() = listOf(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY).pickRandom()!!
+    }
 }
 
 enum class CourseType(val origin: String) {
     FLOW_YOGA("Flow Yoga"),
     AERIAL_YOGA("Aerial Yoga"),
-    FAMILY_YOGA("Family Yoga"),
+    FAMILY_YOGA("Family Yoga");
+
+    companion object {
+        fun pickRandom() = listOf(FLOW_YOGA, FAMILY_YOGA, AERIAL_YOGA).pickRandom()!!
+    }
 }
 
 @Entity

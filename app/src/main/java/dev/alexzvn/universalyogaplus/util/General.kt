@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.random.Random
 
 @Composable
 fun Int.asPainter(): Painter = painterResource(this)
@@ -51,4 +52,14 @@ object Scope {
     inline fun from(scope: CoroutineScope, crossinline block: suspend CoroutineScope.() -> Unit) {
         scope.launch { block() }
     }
+}
+
+fun <T> List<T>.pickRandom(): T? = when (isEmpty()) {
+    true -> null
+    false -> get(Random.nextInt(size))
+}
+
+fun <T> MutableList<T>.popRandom(): T? = when (isEmpty()) {
+    true -> null
+    false -> removeAt(Random.nextInt(size))
 }
