@@ -11,7 +11,7 @@ abstract class Database : RoomDatabase() {
         private const val DATABASE_NAME = "db.sqlite"
 
         fun create(context: Context, name: String = DATABASE_NAME): Database {
-            return Room.databaseBuilder(context, Database::class.java, "2$name").build()
+            return Room.databaseBuilder(context, Database::class.java, "3$name").build()
         }
     }
 

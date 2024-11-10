@@ -5,8 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.random.Random
@@ -62,4 +68,32 @@ fun <T> List<T>.pickRandom(): T? = when (isEmpty()) {
 fun <T> MutableList<T>.popRandom(): T? = when (isEmpty()) {
     true -> null
     false -> removeAt(Random.nextInt(size))
+}
+
+fun DocumentReference.observe() = callbackFlow {
+    val listener = addSnapshotListener { snapshot, e ->
+        if (e != null) {
+            return@addSnapshotListener
+        }
+
+        if (snapshot == null) return@addSnapshotListener
+
+        trySend(snapshot)
+    }
+
+    awaitClose { listener.remove() }
+}
+
+fun Query.observe() = callbackFlow {
+    val listener = addSnapshotListener { snapshot, e ->
+        if (e != null) {
+            return@addSnapshotListener
+        }
+
+        if (snapshot == null) return@addSnapshotListener
+
+        trySend(snapshot)
+    }
+
+    awaitClose { listener.remove() }
 }

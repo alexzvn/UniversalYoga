@@ -15,6 +15,13 @@ data object Route {
         fun view(id: String) = "course/view/$id"
     }
 
+    data object cloud {
+        val Home = "cloud/home"
+        val View = "cloud/view/{id}"
+
+        fun view(id: String) = "cloud/view/$id"
+    }
+
     data object Auth {
         val SplashScreen = "splash"
         val Login = "auth/login"

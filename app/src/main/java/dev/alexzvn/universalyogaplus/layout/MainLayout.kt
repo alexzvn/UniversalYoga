@@ -60,9 +60,7 @@ fun MainLayout(
         modifier = modifier,
 
         bottomBar = {
-            NavigationBar(
-                containerColor = Color.White
-            ) {
+            NavigationBar {
                 val updateState: (NavigateSection) -> Unit = { value ->
                     if (section != value) {
                         value.apply(onNavigate)

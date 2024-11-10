@@ -50,6 +50,7 @@ import dev.alexzvn.universalyogaplus.layout.MainLayout
 import dev.alexzvn.universalyogaplus.local.Course
 import dev.alexzvn.universalyogaplus.local.CourseType
 import dev.alexzvn.universalyogaplus.local.DayOfWeek
+import dev.alexzvn.universalyogaplus.service.CloudService
 import dev.alexzvn.universalyogaplus.service.DatabaseService
 import dev.alexzvn.universalyogaplus.util.Scope
 import dev.alexzvn.universalyogaplus.util.tryToInt
@@ -111,6 +112,10 @@ fun CourseEditSection (
                 description = state.description
             ).also {
                 DatabaseService.course.update(it)
+
+                if (it.sync) {
+                    CloudService.courses.sync(it)
+                }
             }
 
             Scope.Main.launch {

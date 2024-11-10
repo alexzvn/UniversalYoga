@@ -40,6 +40,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.github.javafaker.Faker
 import com.google.firebase.auth.UserInfo
+import com.google.firebase.firestore.FirebaseFirestore
 import dev.alexzvn.universalyogaplus.layout.MainLayout
 import dev.alexzvn.universalyogaplus.layout.NavigateSection
 import dev.alexzvn.universalyogaplus.local.Course
@@ -47,11 +48,13 @@ import dev.alexzvn.universalyogaplus.local.CourseType
 import dev.alexzvn.universalyogaplus.local.DayOfWeek
 import dev.alexzvn.universalyogaplus.local.Schedule
 import dev.alexzvn.universalyogaplus.service.AuthService
+import dev.alexzvn.universalyogaplus.service.CloudService
 import dev.alexzvn.universalyogaplus.service.DatabaseService
 import dev.alexzvn.universalyogaplus.util.popRandom
 import dev.alexzvn.universalyogaplus.util.toEpochMilli
 import dev.alexzvn.universalyogaplus.util.toLocal
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.Date
 
 
@@ -115,6 +118,19 @@ object DemoApp {
             type = type,
             createdAt = Date().time,
         )
+    }
+
+    suspend fun clearFirebase() {
+        val courses = CloudService.courses.collection.get().await()
+        val schedules = CloudService.schedules.collection.get().await()
+
+        for (doc in courses.documents) {
+            doc.reference.delete()
+        }
+
+        for (doc in schedules.documents) {
+            doc.reference.delete()
+        }
     }
 }
 
@@ -221,6 +237,18 @@ fun ProfileScreen(
                         }
                     ) {
                         Text("Reset Local Database")
+                    }
+
+                    FilledTonalButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            scope.launch {
+                                DemoApp.clearFirebase()
+                                snackbar.showSnackbar("Cleared Firebase")
+                            }
+                        }
+                    ) {
+                        Text("Reset Firebase Data")
                     }
                 }
             }

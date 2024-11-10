@@ -7,6 +7,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import androidx.room.TypeConverters
+import com.google.firebase.firestore.DocumentSnapshot
 import java.time.DayOfWeek as DOW
 import dev.alexzvn.universalyogaplus.util.nanoid
 import dev.alexzvn.universalyogaplus.util.pickRandom
@@ -103,21 +104,63 @@ data class Course(
     val nanoID: String = nanoid(),
 
     @ColumnInfo(name = "created_at")
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "sync")
+    val sync: Boolean = false
 ) {
-    val parsedStartTime
-        @SuppressLint("DefaultLocale")
-        get() = object {
-            val hours: Int = startTime / 60
-            val minutes: Int = startTime % 60
+    val parsedStartTime get() = object {
+        val hours: Int = startTime / 60
+        val minutes: Int = startTime % 60
 
-            override fun toString(): String {
-                val a = hours.toString().padStart(2, '0')
-                val b = minutes.toString().padStart(2, '0')
+        override fun toString(): String {
+            val a = hours.toString().padStart(2, '0')
+            val b = minutes.toString().padStart(2, '0')
 
-                return "$a:$b"
+            return "$a:$b"
+        }
+    }
+
+    val map get() = hashMapOf(
+        "local_id" to id,
+        "title" to title,
+        "day_of_week" to dayOfWeek.name,
+        "capacity" to capacity,
+        "start_time" to startTime,
+        "duration" to duration,
+        "price" to price,
+        "type" to type.name,
+        "description" to description,
+        "created_at" to createdAt,
+    )
+
+    companion object {
+        fun tryFromDocument(document: DocumentSnapshot): Course? {
+            try {
+                return document.data?.run {
+                    val getLongAsInt = { key: String ->
+                        (get(key) as Long).toInt()
+                    }
+
+                    Course(
+                        id = getLongAsInt("local_id"),
+                        title = get("title") as String,
+                        dayOfWeek = DayOfWeek.valueOf(get("day_of_week") as String),
+                        capacity = getLongAsInt("capacity"),
+                        startTime = getLongAsInt("start_time"),
+                        duration = getLongAsInt("duration"),
+                        price = get("price") as Double,
+                        type = CourseType.valueOf(get("type") as String),
+                        description = get("description") as String,
+                        nanoID = document.id,
+                        createdAt = get("created_at") as Long
+                    )
+                }
+            } catch (e: Exception) {
+                return null
             }
         }
+    }
 }
 
 data class CourseWithSchedules(

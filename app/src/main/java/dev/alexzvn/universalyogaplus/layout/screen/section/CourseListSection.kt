@@ -37,6 +37,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import dev.alexzvn.universalyogaplus.component.CourseCard
 import dev.alexzvn.universalyogaplus.local.Course
+import dev.alexzvn.universalyogaplus.service.CloudService
 import dev.alexzvn.universalyogaplus.service.DatabaseService
 import dev.alexzvn.universalyogaplus.util.Route
 import kotlinx.coroutines.launch
@@ -84,6 +85,10 @@ fun CourseListSection(
 
             scope.launch {
                 DatabaseService.course.delete(course)
+
+                if (course.sync) {
+                    CloudService.courses.removeWithSchedule(course)
+                }
             }
         }
 

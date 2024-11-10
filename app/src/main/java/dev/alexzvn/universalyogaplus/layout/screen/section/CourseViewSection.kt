@@ -43,6 +43,7 @@ import dev.alexzvn.universalyogaplus.local.CourseType
 import dev.alexzvn.universalyogaplus.local.CourseWithSchedules
 import dev.alexzvn.universalyogaplus.local.DayOfWeek
 import dev.alexzvn.universalyogaplus.local.Schedule
+import dev.alexzvn.universalyogaplus.service.CloudService
 import dev.alexzvn.universalyogaplus.service.DatabaseService
 import dev.alexzvn.universalyogaplus.util.Route
 import kotlinx.coroutines.launch
@@ -145,6 +146,10 @@ private fun CourseView(
                     onDelete = {
                         scope.launch {
                             DatabaseService.schedule.delete(schedule)
+
+                            if (course.sync) {
+                                CloudService.schedules.remove(schedule)
+                            }
                         }
 
                         schedules = schedules.filter { it.id != schedule.id }

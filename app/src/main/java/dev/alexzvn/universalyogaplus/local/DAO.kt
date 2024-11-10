@@ -5,8 +5,61 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.room.Update
+import androidx.sqlite.db.SimpleSQLiteQuery
+import androidx.sqlite.db.SupportSQLiteQuery
+
+data class CourseQuery(
+    val term: String? = null,
+    val dow: DayOfWeek? = null,
+    val type: CourseType? = null,
+    val teacher: String? = null,
+    val startTime: Long? = null
+) {
+    val query: SimpleSQLiteQuery get() = run {
+        val args = mutableListOf<String>()
+        val query = StringBuilder("SELECT course.* FROM course")
+        val conditions = mutableListOf<String>()
+
+        if (term != null) {
+            conditions.add("title LIKE ? OR description LIKE ?")
+            args.add("%$term%")
+            args.add("%$term%")
+        }
+
+        if (dow != null) {
+            conditions.add("day_of_week = ?")
+            args.add(dow.name)
+        }
+
+        if (type != null) {
+            conditions.add("type = ?")
+            args.add(type.name)
+        }
+
+        if (startTime != null) {
+            conditions.add("start_time = ?")
+            args.add(startTime.toString())
+        }
+
+        if (conditions.isNotEmpty()) {
+            query.append(" WHERE ")
+            query.append(conditions.joinToString(" AND "))
+        }
+
+        if (teacher != null) {
+            query.append(" INNER JOIN schedule ON course.id = schedule.course_id")
+            query.append(" WHERE schedule.teacher LIKE ?")
+            args.add("%$teacher%")
+        }
+
+        return query.append(";").toString().let {
+            SimpleSQLiteQuery(it, args.toTypedArray())
+        }
+    }
+}
 
 @Dao
 interface CourseDAO {
@@ -33,6 +86,13 @@ interface CourseDAO {
 
     @Query("DELETE FROM course")
     suspend fun truncate()
+
+    @RawQuery
+    suspend fun query(query: SupportSQLiteQuery): List<Schedule>
+
+    suspend fun query(courseQuery: CourseQuery): List<Schedule> {
+        return query(courseQuery.query)
+    }
 
     @Query("SELECT * FROM course WHERE title LIKE :query OR description LIKE :query OR type LIKE :query OR day_of_week LIKE :query")
     suspend fun search(query: String): List<Course>

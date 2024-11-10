@@ -47,6 +47,7 @@ import java.util.Date
 fun ScheduleCard(
     schedule: Schedule,
     modifier: Modifier = Modifier,
+    showAction: Boolean = true,
     onClick: () -> Unit = {},
     onDelete: () -> Unit = {},
     onEdit: () -> Unit = {},
@@ -90,27 +91,28 @@ fun ScheduleCard(
                     }
                 }
 
-                IconButton(
-                    onClick = { expanded = true }
-                ) {
-                    Icon(Icons.Default.MoreVert, "more")
-                }
+                if (showAction) {
+                    IconButton(
+                        onClick = { expanded = true }
+                    ) {
+                        Icon(Icons.Default.MoreVert, "more")
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+//                        DropdownMenuItem(
+//                            text = { Text("Edit schedule") },
+//                            onClick = { close().also { onEdit() } },
+//                            leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
+//                        )
 
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Edit schedule") },
-                        onClick = { close().also { onEdit() } },
-                        leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
-                    )
-
-                    DropdownMenuItem(
-                        text = { Text(text = "Delete schedule", color = Color.Red) },
-                        onClick = { close().also { onDelete() } },
-                        leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null) }
-                    )
+                        DropdownMenuItem(
+                            text = { Text(text = "Delete schedule", color = Color.Red) },
+                            onClick = { close().also { onDelete() } },
+                            leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null) }
+                        )
+                    }
                 }
             }
         }

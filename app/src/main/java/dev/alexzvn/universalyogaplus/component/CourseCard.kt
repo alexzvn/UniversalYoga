@@ -61,14 +61,15 @@ import kotlinx.coroutines.launch
 fun CourseCard(
     modifier: Modifier = Modifier,
     course: Course,
-    onClick: () -> Unit = {},
-    onEdit: () -> Unit = {},
-    onDelete: () -> Unit = {}
+    onClick: (() -> Unit)? = null,
+    onEdit: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null,
+    dropdownContent: @Composable () -> Unit = {}
 ) {
     ElevatedCard (
         modifier = modifier,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        onClick = onClick,
+        onClick = onClick ?: {},
     ) {
         Row (
             modifier = Modifier.fillMaxWidth(),
@@ -106,23 +107,31 @@ fun CourseCard(
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
-                    DropdownMenuItem(
-                        text = { Text("Details") },
-                        onClick = { close().also { onClick() } },
-                        leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) }
-                    )
+                    if (onClick != null) {
+                        DropdownMenuItem(
+                            text = { Text("Details") },
+                            onClick = { close().also { onClick() } },
+                            leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) }
+                        )
+                    }
 
-                    DropdownMenuItem(
-                        text = { Text("Edit course") },
-                        onClick = { close().also { onEdit() } },
-                        leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
-                    )
+                    if (onEdit != null) {
+                        DropdownMenuItem(
+                            text = { Text("Edit course") },
+                            onClick = { close().also { onEdit() } },
+                            leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
+                        )
+                    }
 
-                    DropdownMenuItem(
-                        text = { Text(text = "Delete course", color = Color.Red) },
-                        onClick = { close().also { onDelete() } },
-                        leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null) }
-                    )
+                    if (onDelete != null) {
+                        DropdownMenuItem(
+                            text = { Text(text = "Delete course", color = Color.Red) },
+                            onClick = { close().also { onDelete() } },
+                            leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null) }
+                        )
+                    }
+
+                    dropdownContent()
                 }
             }
         }
