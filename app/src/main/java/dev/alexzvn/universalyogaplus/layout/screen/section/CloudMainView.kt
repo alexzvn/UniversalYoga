@@ -30,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -90,7 +92,9 @@ fun SelectCourseSyncDialog(
         )
     ) {
         Box (
-            modifier = Modifier.fillMaxSize().background(Color.White),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
         ) {
             Column {
                 Row (
@@ -108,17 +112,27 @@ fun SelectCourseSyncDialog(
                     TextButton (onClick = { onSave(courses) }) { Text("Save") }
                 }
 
+                val checkAll = {
+                    modeSelected = modeSelected.not()
+                    courses = courses.map { it.copy(selected = modeSelected) }.toMutableList()
+                }
+
                 Row {
-                    Checkbox(
-                        checked = modeSelected,
-                        onCheckedChange = { modeSelected = modeSelected.not() },
-                        enabled = false
+                    val allOn = courses.all { it.selected }
+                    val allOff = courses.none { it.selected }
+
+                    TriStateCheckbox(
+                        onClick = checkAll,
+                        state = when (!allOn && !allOff) {
+                            true -> ToggleableState.Indeterminate
+                            false -> when (allOn) {
+                                true -> ToggleableState.On
+                                false -> ToggleableState.Off
+                            }
+                        }
                     )
                     TextButton(
-                        onClick = {
-                            modeSelected = modeSelected.not()
-                            courses = courses.map { it.copy(selected = modeSelected) }.toMutableList()
-                        },
+                        onClick = checkAll,
                         content = { Text("Select All") }
                     )
                 }

@@ -15,8 +15,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +40,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import dev.alexzvn.universalyogaplus.component.CourseCard
+import dev.alexzvn.universalyogaplus.component.SearchDialog
+import dev.alexzvn.universalyogaplus.component.SearchDialogState
 import dev.alexzvn.universalyogaplus.local.Course
+import dev.alexzvn.universalyogaplus.local.CourseQuery
 import dev.alexzvn.universalyogaplus.service.CloudService
 import dev.alexzvn.universalyogaplus.service.DatabaseService
 import dev.alexzvn.universalyogaplus.util.Route
@@ -47,14 +54,46 @@ import kotlinx.coroutines.launch
 fun CourseListSection(
     navigation: NavController = rememberNavController()
 ) {
-    var courses by remember { mutableStateOf(listOf<Course>()) }
     val scope = rememberCoroutineScope()
+    var courses by remember { mutableStateOf(listOf<Course>()) }
+    var showSearchDialog by remember { mutableStateOf(false) }
+    var searchState by remember { mutableStateOf(SearchDialogState()) }
 
     LaunchedEffect(Unit) {
         scope.launch {
             courses = DatabaseService.course.all()
             Log.d("CourseListSection", "Loaded ${courses.size} courses")
         }
+    }
+
+    if (showSearchDialog) {
+        SearchDialog(
+            onDismiss = { showSearchDialog = false },
+            state = searchState,
+            onUpdate = { searchState = it },
+            onSearch = {
+                showSearchDialog = false
+
+                scope.launch {
+                    val search = searchState
+
+                    courses = DatabaseService.course.query(
+                        CourseQuery(
+                            term = when (search.term.isBlank()) {
+                                true -> null
+                                else -> search.term.trim()
+                            },
+                            teacher = when (search.teacher.isBlank()) {
+                                true -> null
+                                else -> search.teacher.trim()
+                            },
+                            dow = search.dow,
+                            type = search.type
+                        )
+                    ).distinctBy { it.id }
+                }
+            }
+        )
     }
 
     Column () {
@@ -69,6 +108,13 @@ fun CourseListSection(
                 modifier = Modifier.padding(top = 10.dp),
                 style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold)
             )
+
+            IconButton(
+                colors = IconButtonDefaults.outlinedIconButtonColors(),
+                onClick = { showSearchDialog = true }
+            ) {
+                Icon(Icons.Default.Search, "search")
+            }
 
             Button(
                 onClick = { navigation.navigate(Route.Course.Create) },

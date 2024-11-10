@@ -1,5 +1,6 @@
 package dev.alexzvn.universalyogaplus.local
 
+import android.util.Log
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -24,7 +25,7 @@ data class CourseQuery(
         val conditions = mutableListOf<String>()
 
         if (term != null) {
-            conditions.add("title LIKE ? OR description LIKE ?")
+            conditions.add("(title LIKE ? OR description LIKE ?)")
             args.add("%$term%")
             args.add("%$term%")
         }
@@ -50,12 +51,14 @@ data class CourseQuery(
         }
 
         if (teacher != null) {
-            query.append(" INNER JOIN schedule ON course.id = schedule.course_id")
+            // INNER JOIN
+            query.append(" JOIN schedule ON course.id = schedule.course_id")
             query.append(" WHERE schedule.teacher LIKE ?")
             args.add("%$teacher%")
         }
 
         return query.append(";").toString().let {
+            Log.d("CourseQuery", "Query: $it")
             SimpleSQLiteQuery(it, args.toTypedArray())
         }
     }
@@ -88,9 +91,9 @@ interface CourseDAO {
     suspend fun truncate()
 
     @RawQuery
-    suspend fun query(query: SupportSQLiteQuery): List<Schedule>
+    suspend fun query(query: SupportSQLiteQuery): List<Course>
 
-    suspend fun query(courseQuery: CourseQuery): List<Schedule> {
+    suspend fun query(courseQuery: CourseQuery): List<Course> {
         return query(courseQuery.query)
     }
 
