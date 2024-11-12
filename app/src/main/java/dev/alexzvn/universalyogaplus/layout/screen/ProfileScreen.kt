@@ -123,12 +123,17 @@ object DemoApp {
     suspend fun clearFirebase() {
         val courses = CloudService.courses.collection.get().await()
         val schedules = CloudService.schedules.collection.get().await()
+        val orders = CloudService.collection("orders").get().await()
 
         for (doc in courses.documents) {
             doc.reference.delete()
         }
 
         for (doc in schedules.documents) {
+            doc.reference.delete()
+        }
+
+        for (doc in orders.documents) {
             doc.reference.delete()
         }
     }

@@ -51,6 +51,7 @@ fun ScheduleCard(
     onClick: () -> Unit = {},
     onDelete: () -> Unit = {},
     onEdit: () -> Unit = {},
+    footer: @Composable () -> Unit = {}
 ) {
     val date = schedule.date.asLocalDate()
     val now = Date().toLocal()
@@ -121,13 +122,15 @@ fun ScheduleCard(
             Text(
                 modifier = Modifier
                     .alpha(.7f)
-                    .padding(horizontal =  10.dp),
+                    .padding(horizontal = 10.dp),
                 style = TextStyle(fontSize = 16.sp),
                 text = schedule.comment
             )
 
             Spacer(Modifier.height(10.dp))
         }
+
+        footer.invoke()
     }
 }
 

@@ -1,6 +1,8 @@
 package dev.alexzvn.universalyogaplus.layout.screen.section
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,10 +32,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldPath
 import dev.alexzvn.universalyogaplus.component.ScheduleCard
 import dev.alexzvn.universalyogaplus.local.Course
+import dev.alexzvn.universalyogaplus.local.Order
 import dev.alexzvn.universalyogaplus.local.Schedule
 import dev.alexzvn.universalyogaplus.service.CloudService
+import dev.alexzvn.universalyogaplus.service.DatabaseService
 import dev.alexzvn.universalyogaplus.util.Route
 import dev.alexzvn.universalyogaplus.util.observe
 import kotlinx.coroutines.launch
@@ -46,6 +55,7 @@ fun CloudCourseDetail(
     navigation: NavController = rememberNavController(),
 ) {
     var course by remember { mutableStateOf<Course?>(null) }
+    var orders by remember { mutableStateOf(listOf<Order>()) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -58,6 +68,16 @@ fun CloudCourseDetail(
             if (course == null) {
                 navigation.popBackStack()
                 return@launch
+            }
+
+            val query = CloudService.collection("orders")
+                .whereEqualTo("course_nano_id", course!!.nanoID)
+
+            query.observe().collect { snapshots ->
+                Log.d("orders", "orders: $snapshots")
+                orders = snapshots
+                    .mapNotNull { Order.tryFromDocument(it) }
+                    .distinctBy { it.id }
             }
 
             document.observe().collect {
@@ -101,6 +121,10 @@ fun CloudCourseDetail(
                 text = "Start time: ${course.parsedStartTime}"
             )
 
+            Text(
+                text = "Revenues: $${orders.sumOf { it.price }}"
+            )
+
             Spacer(Modifier.height(5.dp))
 
             if (!course.description.isNullOrBlank()) {
@@ -123,8 +147,31 @@ fun CloudCourseDetail(
             modifier = Modifier.weight(1f).padding(horizontal = 10.dp),
             verticalArrangement = Arrangement.Bottom
         ) {
-            items(schedules) {
-                ScheduleCard(schedule = it, showAction = false)
+            items(schedules) { schedule ->
+                var showExtra by remember { mutableStateOf(false) }
+                val booked = orders.filter { it.schedule_nano_id == schedule.nanoID }
+
+                val footer = @Composable {
+                    Column (
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                    ) {
+                        Text("Attendees: ${booked.size}/${course!!.capacity}")
+
+                        if (showExtra) Column {
+                            booked.forEach {
+                                Text("ref: ${it.user_id}")
+                            }
+                        }
+                    }
+
+                }
+
+                ScheduleCard(
+                    schedule = schedule,
+                    showAction = false,
+                    onClick = { showExtra = showExtra.not() },
+                    footer = footer
+                )
                 Spacer(Modifier.height(10.dp))
             }
 

@@ -56,6 +56,7 @@ data class Schedule(
                         id = getLongAsInt("local_id"),
                         date = get("start_date") as Long,
                         courseId = getLongAsInt("course_id"),
+                        nanoID = document.id,
                         teacher = get("teacher") as String,
                         comment = get("comment") as String,
                     )

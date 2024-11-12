@@ -13,7 +13,9 @@ import kotlinx.coroutines.tasks.await
 
 
 object CloudService {
-    private val db get() = DatabaseService.cloud
+    val db get() = DatabaseService.cloud
+
+    fun collection(name: String) = db.collection(name)
 
     object courses {
         val collection get() = db.collection("courses")
