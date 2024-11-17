@@ -45,16 +45,16 @@ data class CourseQuery(
             args.add(startTime.toString())
         }
 
-        if (conditions.isNotEmpty()) {
-            query.append(" WHERE ")
-            query.append(conditions.joinToString(" AND "))
-        }
-
         if (teacher != null) {
             // INNER JOIN
             query.append(" JOIN schedule ON course.id = schedule.course_id")
-            query.append(" WHERE schedule.teacher LIKE ?")
+            conditions.add("schedule.teacher LIKE ?")
             args.add("%$teacher%")
+        }
+
+        if (conditions.isNotEmpty()) {
+            query.append(" WHERE ")
+            query.append(conditions.joinToString(" AND "))
         }
 
         return query.append(";").toString().let {
